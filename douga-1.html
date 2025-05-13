@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>文章から1分動画を作成</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: sans-serif;
@@ -32,41 +32,46 @@
 </head>
 <body>
   <h1>文章から1分動画を作成</h1>
-  <textarea id="textInput" placeholder="ここにテキストを入力してください"></textarea><br>
+  <textarea id="textInput" placeholder="ここにテキストを入力してください"></textarea><br />
   <button id="generateBtn">動画を生成</button>
-  <div id="status">FFmpegライブラリを読み込んでいます...</div>
+  <div id="status">FFmpegライブラリを読み込み中です...</div>
   <video id="preview" controls></video>
 
-  <!-- ✅ ffmpeg.wasm 用 CDN（安全で確実に動作） -->
+  <!-- ✅ FFmpeg公式の安定版CDNを使用 -->
   <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.5/dist/ffmpeg.min.js"></script>
 
   <script>
     let ffmpeg;
 
     async function loadFFmpeg() {
+      if (!window.FFmpeg || !FFmpeg.createFFmpeg) {
+        document.getElementById("status").innerText = "FFmpegライブラリの読み込みに失敗しました。";
+        return;
+      }
+
       ffmpeg = FFmpeg.createFFmpeg({ log: true });
       await ffmpeg.load();
       document.getElementById("status").innerText = "準備完了。文章を入力して動画を生成できます。";
     }
 
-    loadFFmpeg(); // 初期ロード
+    loadFFmpeg();
 
     document.getElementById("generateBtn").addEventListener("click", async function () {
-      if (!ffmpeg || !ffmpeg.isLoaded()) {
-        alert("FFmpegの読み込みが完了していません。少し待ってから再度お試しください。");
-        return;
-      }
-
       const text = document.getElementById("textInput").value.trim();
       const status = document.getElementById("status");
       const preview = document.getElementById("preview");
+
+      if (!ffmpeg || !ffmpeg.isLoaded()) {
+        status.innerText = "FFmpegの読み込みがまだ完了していません。しばらくお待ちください。";
+        return;
+      }
 
       if (!text) {
         alert("テキストを入力してください");
         return;
       }
 
-      status.innerText = "処理中...";
+      status.innerText = "動画を生成中...";
 
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
