@@ -33,15 +33,14 @@
 <body>
   <h1>文章から1分動画を作成</h1>
   <textarea id="textInput" placeholder="ここにテキストを入力してください"></textarea><br>
-  <button onclick="generateVideo()">動画を生成</button>
+  <button id="generateBtn">動画を生成</button>
   <div id="status"></div>
   <video id="preview" controls></video>
 
   <script type="module">
     import { createFFmpeg, fetchFile } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.5/+esm';
 
-    // 関数をグローバルに登録する
-    window.generateVideo = async function () {
+    const generateVideo = async () => {
       const text = document.getElementById("textInput").value.trim();
       const status = document.getElementById("status");
       const preview = document.getElementById("preview");
@@ -111,6 +110,9 @@
       lines.push(line.trim());
       return lines;
     }
+
+    // ✅ ここでイベントを登録
+    document.getElementById("generateBtn").addEventListener("click", generateVideo);
   </script>
 </body>
 </html>
