@@ -1,24 +1,25 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>文章から1分動画</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; }
     textarea { width: 100%; height: 150px; font-size: 16px; }
     button { padding: 0.5rem 1rem; margin-top: 1rem; font-size: 16px; }
     video { margin-top: 2rem; max-width: 100%; }
+    #status { margin-top: 1rem; font-weight: bold; }
   </style>
 </head>
 <body>
   <h1>文章から1分動画を作成</h1>
-  <textarea id="textInput" placeholder="ここにテキストを入力してください"></textarea><br>
+  <textarea id="textInput" placeholder="ここにテキストを入力してください"></textarea><br />
   <button id="generateBtn">動画を生成</button>
-  <div id="status">FFmpegライブラリを読み込み中です...</div>
+  <div id="status">FFmpegライブラリを読み込み中...</div>
   <video id="preview" controls></video>
 
-  <!-- ✅ 公式UMDバージョンを読み込む -->
+  <!-- ✅ UMD形式のffmpegライブラリ -->
   <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.5/dist/ffmpeg.min.js"></script>
 
   <script>
@@ -27,12 +28,12 @@
     window.onload = async () => {
       const status = document.getElementById("status");
       try {
-        ffmpeg = FFmpeg.createFFmpeg({ log: true });
+        ffmpeg = window.FFmpeg.createFFmpeg({ log: true });
         await ffmpeg.load();
-        status.textContent = "準備完了！テキストを入力して動画を生成できます";
-      } catch (e) {
+        status.textContent = "準備完了！テキストを入力して動画を生成できます。";
+      } catch (err) {
+        console.error(err);
         status.textContent = "FFmpegライブラリの読み込みに失敗しました。";
-        console.error(e);
       }
     };
 
@@ -42,7 +43,9 @@
       const preview = document.getElementById("preview");
 
       if (!text) return alert("テキストを入力してください");
-      if (!ffmpeg || !ffmpeg.isLoaded()) return alert("FFmpegの読み込みが完了していません");
+      if (!ffmpeg || !ffmpeg.isLoaded()) {
+        return alert("FFmpegの読み込みが完了していません。");
+      }
 
       status.textContent = "動画生成中...";
 
@@ -53,7 +56,7 @@
 
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "white";
+      ctx.fillStyle = "#fff";
       ctx.font = "bold 48px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
