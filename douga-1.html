@@ -2,33 +2,56 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>文章から1分動画を作成</title>
-  <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.5/dist/ffmpeg.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 2rem; background: #f4f4f4; }
-    textarea { width: 100%; height: 150px; }
-    button { padding: 0.5rem 1rem; margin-top: 1rem; }
-    video { margin-top: 2rem; max-width: 100%; }
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f4f4f4;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      font-size: 16px;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      margin-top: 1rem;
+      font-size: 16px;
+    }
+    #status {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+    video {
+      margin-top: 2rem;
+      max-width: 100%;
+    }
   </style>
 </head>
 <body>
-  <h1>文章からショート動画を作成</h1>
-  <textarea id="textInput" placeholder="ここにテキストを入力してください"></textarea>
-  <br>
+  <h1>文章から1分動画を作成</h1>
+  <textarea id="textInput" placeholder="ここにテキストを入力してください"></textarea><br>
   <button onclick="generateVideo()">動画を生成</button>
   <div id="status"></div>
   <video id="preview" controls></video>
 
-  <script>
-    async function generateVideo() {
-      const text = document.getElementById("textInput").value;
-      if (!text) return alert("テキストを入力してください");
+  <script type="module">
+    import { createFFmpeg, fetchFile } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.5/+esm';
 
+    window.generateVideo = async function () {
+      const text = document.getElementById("textInput").value.trim();
       const status = document.getElementById("status");
+      const preview = document.getElementById("preview");
+
+      if (!text) {
+        alert("テキストを入力してください");
+        return;
+      }
+
       status.innerText = "処理中...";
 
-      const { createFFmpeg, fetchFile } = FFmpeg;
       const ffmpeg = createFFmpeg({ log: true });
       await ffmpeg.load();
 
@@ -37,13 +60,13 @@
       canvas.width = 720;
       canvas.height = 1280;
 
-      // 背景色とテキストを描画
       ctx.fillStyle = "#000";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       ctx.fillStyle = "white";
       ctx.font = "bold 48px sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
+
       const lines = wrapText(ctx, text, 600);
       lines.forEach((line, i) => {
         ctx.fillText(line, canvas.width / 2, 400 + i * 60);
@@ -53,7 +76,6 @@
       const arrayBuffer = await blob.arrayBuffer();
       ffmpeg.FS("writeFile", "image.png", new Uint8Array(arrayBuffer));
 
-      // 動画作成（60秒のループ画像）
       await ffmpeg.run(
         "-loop", "1",
         "-t", "60",
@@ -67,11 +89,9 @@
       const videoBlob = new Blob([data.buffer], { type: "video/mp4" });
       const videoUrl = URL.createObjectURL(videoBlob);
 
-      const preview = document.getElementById("preview");
       preview.src = videoUrl;
-
       status.innerText = "動画生成完了！";
-    }
+    };
 
     function wrapText(ctx, text, maxWidth) {
       const words = text.split(" ");
@@ -80,8 +100,7 @@
       for (let n = 0; n < words.length; n++) {
         const testLine = line + words[n] + " ";
         const metrics = ctx.measureText(testLine);
-        const testWidth = metrics.width;
-        if (testWidth > maxWidth && n > 0) {
+        if (metrics.width > maxWidth && n > 0) {
           lines.push(line.trim());
           line = words[n] + " ";
         } else {
