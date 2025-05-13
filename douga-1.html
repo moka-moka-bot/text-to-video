@@ -34,15 +34,29 @@
   <h1>文章から1分動画を作成</h1>
   <textarea id="textInput" placeholder="ここにテキストを入力してください"></textarea><br>
   <button id="generateBtn">動画を生成</button>
-  <div id="status"></div>
+  <div id="status">FFmpegライブラリを読み込んでいます...</div>
   <video id="preview" controls></video>
 
-  <!-- ✅ ライブラリ読み込み（後のJSでFFmpeg.createFFmpegが使える） -->
-  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.5/dist/ffmpeg.min.js"></script>
+  <!-- ✅ ffmpeg.wasm 用 CDN（安全で確実に動作） -->
+  <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.5/dist/ffmpeg.min.js"></script>
 
-  <!-- ✅ JSはFFmpeg読み込み後に実行 -->
   <script>
-    document.getElementById("generateBtn").addEventListener("click", async function generateVideo() {
+    let ffmpeg;
+
+    async function loadFFmpeg() {
+      ffmpeg = FFmpeg.createFFmpeg({ log: true });
+      await ffmpeg.load();
+      document.getElementById("status").innerText = "準備完了。文章を入力して動画を生成できます。";
+    }
+
+    loadFFmpeg(); // 初期ロード
+
+    document.getElementById("generateBtn").addEventListener("click", async function () {
+      if (!ffmpeg || !ffmpeg.isLoaded()) {
+        alert("FFmpegの読み込みが完了していません。少し待ってから再度お試しください。");
+        return;
+      }
+
       const text = document.getElementById("textInput").value.trim();
       const status = document.getElementById("status");
       const preview = document.getElementById("preview");
@@ -52,15 +66,7 @@
         return;
       }
 
-      if (typeof FFmpeg === "undefined") {
-        status.innerText = "FFmpegライブラリが読み込まれていません。";
-        return;
-      }
-
       status.innerText = "処理中...";
-
-      const ffmpeg = FFmpeg.createFFmpeg({ log: true });
-      await ffmpeg.load();
 
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
