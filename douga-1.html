@@ -37,10 +37,11 @@
   <div id="status"></div>
   <video id="preview" controls></video>
 
-  <script type="module">
-    import { createFFmpeg, fetchFile } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.5/+esm';
+  <!-- ✅ 正しいFFmpeg UMD形式ライブラリ -->
+  <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.5/dist/ffmpeg.min.js"></script>
 
-    const generateVideo = async () => {
+  <script>
+    async function generateVideo() {
       const text = document.getElementById("textInput").value.trim();
       const status = document.getElementById("status");
       const preview = document.getElementById("preview");
@@ -52,7 +53,7 @@
 
       status.innerText = "処理中...";
 
-      const ffmpeg = createFFmpeg({ log: true });
+      const ffmpeg = FFmpeg.createFFmpeg({ log: true });
       await ffmpeg.load();
 
       const canvas = document.createElement("canvas");
@@ -91,7 +92,7 @@
 
       preview.src = videoUrl;
       status.innerText = "動画生成完了！";
-    };
+    }
 
     function wrapText(ctx, text, maxWidth) {
       const words = text.split(" ");
@@ -111,7 +112,7 @@
       return lines;
     }
 
-    // ✅ ここでイベントを登録
+    // ✅ イベント登録（モジュール不要）
     document.getElementById("generateBtn").addEventListener("click", generateVideo);
   </script>
 </body>
