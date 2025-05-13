@@ -40,6 +40,7 @@
   <script type="module">
     import { createFFmpeg, fetchFile } from 'https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.12.5/+esm';
 
+    // 関数をグローバルに登録する
     window.generateVideo = async function () {
       const text = document.getElementById("textInput").value.trim();
       const status = document.getElementById("status");
