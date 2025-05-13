@@ -37,17 +37,23 @@
   <div id="status"></div>
   <video id="preview" controls></video>
 
-  <!-- ✅ 正しいFFmpeg UMD形式ライブラリ -->
+  <!-- ✅ ライブラリ読み込み（後のJSでFFmpeg.createFFmpegが使える） -->
   <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.5/dist/ffmpeg.min.js"></script>
 
+  <!-- ✅ JSはFFmpeg読み込み後に実行 -->
   <script>
-    async function generateVideo() {
+    document.getElementById("generateBtn").addEventListener("click", async function generateVideo() {
       const text = document.getElementById("textInput").value.trim();
       const status = document.getElementById("status");
       const preview = document.getElementById("preview");
 
       if (!text) {
         alert("テキストを入力してください");
+        return;
+      }
+
+      if (typeof FFmpeg === "undefined") {
+        status.innerText = "FFmpegライブラリが読み込まれていません。";
         return;
       }
 
@@ -92,7 +98,7 @@
 
       preview.src = videoUrl;
       status.innerText = "動画生成完了！";
-    }
+    });
 
     function wrapText(ctx, text, maxWidth) {
       const words = text.split(" ");
@@ -111,9 +117,6 @@
       lines.push(line.trim());
       return lines;
     }
-
-    // ✅ イベント登録（モジュール不要）
-    document.getElementById("generateBtn").addEventListener("click", generateVideo);
   </script>
 </body>
 </html>
